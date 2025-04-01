@@ -34,6 +34,11 @@ func (s TaskId) Int64() int64 {
 	return i
 }
 
+func NewTaskId(d int64) string {
+	s := strconv.FormatInt(d, 10)
+	return strings.Join([]string{TaskPrfix, s}, TaskSep)
+}
+
 type StoreTask struct {
 	Id     string
 	Name   string
