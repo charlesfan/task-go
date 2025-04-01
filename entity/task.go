@@ -17,7 +17,7 @@ type Task struct {
 
 func (t *Task) StoreModel() *model.StoreTask {
 	mst := &model.StoreTask{
-		Id:   model.NewTaskId(t.Id),
+		Id:   model.NewStoreTaskId(t.Id),
 		Name: t.Name,
 	}
 
@@ -29,4 +29,14 @@ func (t *Task) StoreModel() *model.StoreTask {
 	}
 
 	return mst
+}
+
+func (t *Task) FromStoreModel(m *model.StoreTask) {
+	t.Id = m.Id.Int64()
+	t.Name = m.Name
+
+	if m.Status != nil && m.Status.Valid {
+		status := m.Status.Int
+		t.Status = &status
+	}
 }
