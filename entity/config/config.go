@@ -59,6 +59,8 @@ func Init() {
 		},
 	}
 
+	c.logInit()
+
 	if err := c.loadConfig(); err != nil {
 		log.Error("load config failed")
 		os.Exit(1)
@@ -76,14 +78,14 @@ func (c *Config) loadConfig() error {
 	if cfgPath != "" {
 		viper.SetConfigFile(cfgPath)
 		if err := viper.ReadInConfig(); err != nil {
-			fmt.Printf("Error reading config file (%s), %v", cfgPath, err)
+			log.Errorf("Error reading config file (%s), %v", cfgPath, err)
 			os.Exit(1)
 		}
 	}
 
 	err := viper.Unmarshal(&c)
 	if err != nil {
-		fmt.Printf("Unable to decode into struct, %v", err)
+		log.Errorf("Unable to decode into struct, %v", err)
 		return err
 	}
 
