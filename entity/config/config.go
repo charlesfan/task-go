@@ -56,6 +56,7 @@ func Init() {
 			Addr:     "store:6379",
 			Password: "",
 			DB:       0,
+			PoolSize: 100,
 		},
 	}
 
