@@ -15,7 +15,8 @@ const (
 )
 
 var (
-	once sync.Once
+	once      sync.Once
+	storeRepo *Store
 )
 
 type IStore interface {
@@ -23,6 +24,7 @@ type IStore interface {
 	Set(context.Context, string, any) *Result
 	Get(context.Context, string) *Result
 	Delete(context.Context, string) *Result
+	FlushDB(context.Context) error
 }
 
 type onceRepo struct {
@@ -58,12 +60,15 @@ func (s *Store) TaskStore() storeDomain.ITaskStore {
 }
 
 func NewStore(c config.Config) *Store {
-	s := &Store{}
-	switch c.Store {
-	case RedisStore:
-		s.initRedis(c.Redis)
-		return s
-	default:
-		return nil
-	}
+	once.Do(func() {
+		s := &Store{}
+		switch c.Store {
+		case RedisStore:
+			s.initRedis(c.Redis)
+		default:
+		}
+		storeRepo = s
+	})
+
+	return storeRepo
 }

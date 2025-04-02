@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	//"time"
 
 	"github.com/go-redis/redis/v8"
 
@@ -143,17 +142,6 @@ func (e *redisEngine) Delete(ctx context.Context, key string) (r *Result) {
 	return
 }
 
-/*
-func (e *redisEngine) BindJSON(ctx context.Context, key string, dest interface{}) (bool, error) {
-	val, err := e.client.Get(ctx, key).Bytes()
-	if err != nil {
-		return false, err
-	}
-
-	if err := json.Unmarshal(val, dest); err != nil {
-		return false, err
-	}
-
-	return true, nil
+func (e *redisEngine) FlushDB(ctx context.Context) error {
+	return e.client.FlushDB(ctx).Err()
 }
-*/
