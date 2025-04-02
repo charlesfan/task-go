@@ -85,8 +85,14 @@ func (s *taskStore) Set(f *model.StoreTask) (*model.StoreTask, error) {
 	return f, result.Err()
 }
 
-func (s *taskStore) Delete(key int64) error {
-	return nil
+func (s *taskStore) Delete(id int64) error {
+	if id <= 0 {
+		return fmt.Errorf("task id: %d is not available", id)
+	}
+	f := model.StoreTask{Id: id}
+	ctx := context.Background()
+	key := f.Key()
+	return s.rdb.Delete(ctx, key).Err()
 }
 
 func newTaskStore(db IStore) store.ITaskStore {
