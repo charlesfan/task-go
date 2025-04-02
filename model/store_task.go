@@ -12,13 +12,13 @@ const (
 	TaskSep   = ":"
 )
 
-type StoreTaskId string
+type StoreKeyTask string
 
-func (s StoreTaskId) String() string {
+func (s StoreKeyTask) String() string {
 	return string(s)
 }
 
-func (s StoreTaskId) Int64() int64 {
+func (s StoreKeyTask) Int64() int64 {
 	a := strings.Split(s.String(), TaskSep)
 	if len(a) < 2 {
 		log.Error("fail to int64: ", s)
@@ -34,14 +34,23 @@ func (s StoreTaskId) Int64() int64 {
 	return i
 }
 
-func NewStoreTaskId(d int64) StoreTaskId {
+func newStoreKeyTask(d int64) StoreKeyTask {
 	s := strconv.FormatInt(d, 10)
 	id := strings.Join([]string{TaskPrfix, s}, TaskSep)
-	return StoreTaskId(id)
+	return StoreKeyTask(id)
 }
 
 type StoreTask struct {
-	Id     StoreTaskId
+	Id     int64
 	Name   string
 	Status *NullInt
+}
+
+func (t *StoreTask) Key() string {
+	if t.Id <= 0 {
+		log.Errorf("id is null: %+v", t)
+		return ""
+	}
+
+	return newStoreKeyTask(t.Id).String()
 }

@@ -20,9 +20,8 @@ func Test_TaskStoreModel(t *testing.T) {
 		Status: &status,
 	}
 
-	mid := model.NewStoreTaskId(id)
 	want := &model.StoreTask{
-		Id:   mid,
+		Id:   id,
 		Name: name,
 		Status: &model.NullInt{
 			Int:   status,
@@ -35,7 +34,6 @@ func Test_TaskStoreModel(t *testing.T) {
 
 func Test_FromStoreModel(t *testing.T) {
 	id := int64(575880729439768609)
-	mid := model.NewStoreTaskId(id)
 	name := "Task-01"
 	status := entity.TaskIncomplete
 
@@ -46,7 +44,7 @@ func Test_FromStoreModel(t *testing.T) {
 	}
 
 	mt := &model.StoreTask{
-		Id:   mid,
+		Id:   id,
 		Name: name,
 		Status: &model.NullInt{
 			Int:   status,
