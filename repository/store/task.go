@@ -61,7 +61,28 @@ func (s *taskStore) Find() ([]model.StoreTask, error) {
 }
 
 func (s *taskStore) Set(f *model.StoreTask) (*model.StoreTask, error) {
-	return f, nil
+	if f.Id <= 0 {
+		return nil, fmt.Errorf("task id: %d is not available", f.Id)
+	}
+
+	key := f.Key()
+	if key == "" {
+		return nil, fmt.Errorf("the key of %+v is null", f)
+	}
+
+	ctx := context.Background()
+	r := s.rdb.Get(ctx, key)
+	if len(r.Rows) <= 0 {
+		return nil, fmt.Errorf("task: %d not found", f.Id)
+	}
+
+	data, err := json.Marshal(f)
+	if err != nil {
+		return nil, err
+	}
+
+	result := s.rdb.Set(ctx, key, data)
+	return f, result.Err()
 }
 
 func (s *taskStore) Delete(key int64) error {

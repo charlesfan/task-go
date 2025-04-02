@@ -138,3 +138,83 @@ func TestTaskStore_Find(t *testing.T) {
 		})
 	}
 }
+
+func TestTaskStore_Set(t *testing.T) {
+	s, teardownTestCase := setupTaskStoreTestCase(t)
+	defer teardownTestCase(t)
+
+	tt := []struct {
+		name         string
+		givenFile    *model.StoreTask
+		wantErr      error
+		setupSubTest test.SetupSubTest
+	}{
+		{
+			name: "success",
+			givenFile: &model.StoreTask{
+				Id:   int64(575880729439768611),
+				Name: "Task-testing-update",
+				Status: &model.NullInt{
+					Int:   0,
+					Valid: true,
+				},
+			},
+			wantErr: nil,
+			setupSubTest: func(t *testing.T) func(t *testing.T) {
+				f := &model.StoreTask{
+					Id:   int64(575880729439768611),
+					Name: "Task-testing",
+					Status: &model.NullInt{
+						Int:   1,
+						Valid: true,
+					},
+				}
+
+				err := s.store.Save(f)
+				assert.Nil(t, err)
+
+				return func(t *testing.T) {
+				}
+			},
+		},
+		{
+			name: "not found",
+			givenFile: &model.StoreTask{
+				Id:   int64(575880729439768622),
+				Name: "Task-testing-update",
+				Status: &model.NullInt{
+					Int:   0,
+					Valid: true,
+				},
+			},
+			wantErr: errors.New("task: 575880729439768622 not found"),
+			setupSubTest: func(t *testing.T) func(t *testing.T) {
+				f := &model.StoreTask{
+					Id:   int64(575880729439768611),
+					Name: "Task-testing",
+					Status: &model.NullInt{
+						Int:   1,
+						Valid: true,
+					},
+				}
+
+				err := s.store.Save(f)
+				assert.Nil(t, err)
+
+				return func(t *testing.T) {
+				}
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			teardownSubTest := tc.setupSubTest(t)
+			defer teardownSubTest(t)
+
+			datas, err := s.store.Set(tc.givenFile)
+			t.Log(datas)
+			assert.Equal(t, tc.wantErr, err)
+		})
+	}
+}
