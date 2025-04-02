@@ -32,6 +32,7 @@ func (l LogLevel) String() string { return string(l) }
 
 type Config struct {
 	Env    string
+	Store  string
 	Server *Server
 	Log    *Log
 	Redis  *Redis
@@ -43,7 +44,8 @@ func New() Config {
 
 func Init() {
 	c := Config{
-		Env: "development",
+		Env:   "development",
+		Store: "redis",
 		Log: &Log{
 			Level: DebugLevel.String(),
 		},
@@ -56,6 +58,7 @@ func Init() {
 			Addr:     "store:6379",
 			Password: "",
 			DB:       0,
+			PoolSize: 100,
 		},
 	}
 
