@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 )
 
+const (
+	DefaultSep = ":"
+)
+
 type NullInt struct {
 	Int   int
 	Valid bool

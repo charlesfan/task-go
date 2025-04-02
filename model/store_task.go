@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	TaskPrfix = "task"
-	TaskSep   = ":"
+	TaskPrefix = "task"
+	TaskSep    = DefaultSep
 )
 
 type StoreKeyTask string
@@ -36,7 +36,7 @@ func (s StoreKeyTask) Int64() int64 {
 
 func newStoreKeyTask(d int64) StoreKeyTask {
 	s := strconv.FormatInt(d, 10)
-	id := strings.Join([]string{TaskPrfix, s}, TaskSep)
+	id := strings.Join([]string{TaskPrefix, s}, TaskSep)
 	return StoreKeyTask(id)
 }
 
