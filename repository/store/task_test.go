@@ -80,3 +80,61 @@ func TestTaskStore_Save(t *testing.T) {
 		})
 	}
 }
+
+func TestTaskStore_Find(t *testing.T) {
+	s, teardownTestCase := setupTaskStoreTestCase(t)
+	defer teardownTestCase(t)
+
+	tt := []struct {
+		name         string
+		wantLen      int
+		wantErr      error
+		setupSubTest test.SetupSubTest
+	}{
+		{
+			name:    "success",
+			wantLen: 2,
+			wantErr: nil,
+			setupSubTest: func(t *testing.T) func(t *testing.T) {
+				f1 := &model.StoreTask{
+					Id:   int64(575880729439768611),
+					Name: "Task-testing-01",
+					Status: &model.NullInt{
+						Int:   0,
+						Valid: true,
+					},
+				}
+
+				f2 := &model.StoreTask{
+					Id:   int64(575880729439768623),
+					Name: "Task-testing-02",
+					Status: &model.NullInt{
+						Int:   0,
+						Valid: true,
+					},
+				}
+
+				err := s.store.Save(f1)
+				assert.Nil(t, err)
+
+				err = s.store.Save(f2)
+				assert.Nil(t, err)
+
+				return func(t *testing.T) {
+				}
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			teardownSubTest := tc.setupSubTest(t)
+			defer teardownSubTest(t)
+
+			datas, err := s.store.Find()
+			t.Log(datas)
+			assert.Equal(t, tc.wantErr, err)
+			assert.Equal(t, tc.wantLen, len(datas))
+		})
+	}
+}

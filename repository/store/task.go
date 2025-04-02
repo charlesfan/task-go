@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/charlesfan/task-go/domain/store"
 	"github.com/charlesfan/task-go/model"
@@ -35,7 +36,27 @@ func (s *taskStore) Save(f *model.StoreTask) error {
 }
 
 func (s *taskStore) Find() ([]model.StoreTask, error) {
-	var f []model.StoreTask
+	key := strings.Join([]string{model.TaskPrefix, "*"}, model.TaskSep)
+	ctx := context.Background()
+	result := s.rdb.Get(ctx, key)
+
+	var (
+		strArr []string
+		f      []model.StoreTask
+	)
+
+	if err := result.Bind(&strArr); err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(strArr); i++ {
+		var v model.StoreTask
+		if err := json.Unmarshal([]byte(strArr[i]), &v); err != nil {
+			return nil, err
+		}
+		f = append(f, v)
+	}
+
 	return f, nil
 }
 
