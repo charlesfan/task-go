@@ -2,10 +2,11 @@ package store
 
 import (
 	"context"
-	"encoding/json"
+	"sync"
 
 	"github.com/go-redis/redis/v8"
 
+	storeDomain "github.com/charlesfan/task-go/domain/store"
 	"github.com/charlesfan/task-go/entity/config"
 )
 
@@ -13,42 +14,28 @@ const (
 	RedisStore = "redis"
 )
 
+var (
+	once      sync.Once
+	storeRepo *Store
+)
+
 type IStore interface {
 	Status() (string, error)
 	Set(context.Context, string, any) *Result
 	Get(context.Context, string) *Result
 	Delete(context.Context, string) *Result
+	FlushDB(context.Context) error
 }
 
-type Result struct {
-	err  error
-	Rows []byte
-}
-
-func (r *Result) setErr(err error) {
-	if err != nil && err != redis.Nil {
-		r.err = err
-	}
-}
-
-func (r *Result) setRows(d []byte) {
-	r.Rows = d
-}
-
-func (r *Result) Err() error {
-	return r.err
-}
-
-func (r *Result) Bind(dest any) error {
-	if err := json.Unmarshal(r.Rows, dest); err != nil {
-		return err
-	}
-
-	return nil
+type onceRepo struct {
+	once sync.Once
+	repo interface{}
 }
 
 type Store struct {
 	db IStore
+
+	taskStore onceRepo
 }
 
 func (s *Store) DB() IStore {
@@ -64,13 +51,24 @@ func (s *Store) initRedis(c *config.Redis) {
 	s.db = newRedis(opts)
 }
 
+func (s *Store) TaskStore() storeDomain.ITaskStore {
+	s.taskStore.once.Do(func() {
+		s.taskStore.repo = newTaskStore(s.db)
+	})
+
+	return s.taskStore.repo.(storeDomain.ITaskStore)
+}
+
 func NewStore(c config.Config) *Store {
-	s := &Store{}
-	switch c.Store {
-	case RedisStore:
-		s.initRedis(c.Redis)
-		return s
-	default:
-		return nil
-	}
+	once.Do(func() {
+		s := &Store{}
+		switch c.Store {
+		case RedisStore:
+			s.initRedis(c.Redis)
+		default:
+		}
+		storeRepo = s
+	})
+
+	return storeRepo
 }
