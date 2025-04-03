@@ -2,6 +2,8 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
+
+	"github.com/charlesfan/task-go/controller/route/task"
 )
 
 type RequestHeader struct {
@@ -28,6 +30,7 @@ func (r *Router) Config() {
 	v.Any("", func(c *gin.Context) {
 		c.String(200, "power by Charles")
 	})
+	task.ConfigRouterGroup(v)
 }
 
 func (r *Router) Run() {

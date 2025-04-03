@@ -6,16 +6,32 @@ import (
 	"github.com/charlesfan/task-go/entity"
 	"github.com/charlesfan/task-go/entity/errcode"
 	"github.com/charlesfan/task-go/utils/log"
+	"github.com/charlesfan/task-go/utils/snowflakeId"
 )
 
 type taskService struct {
-	repo repoDomain.ITaskStore
+	repo     repoDomain.ITaskStore
+	workerId int64
 }
 
-func (s *taskService) setTask(f *entity.Task) error {
-	if f.Id <= 0 {
+func (s *taskService) setTask(f *entity.Task, idCanNil bool) error {
+	if f.Id < 0 {
 		log.Errorf("task id is not available: %d", f.Id)
 		return errcode.New(errcode.ErrorCodeBadRequest)
+	}
+
+	if f.Id == 0 {
+		if idCanNil {
+			idgen, err := snowflakeId.NewWorker(s.workerId)
+			if err != nil {
+				log.Error(err)
+				return errcode.New(errcode.ErrorCodeServerErr)
+			}
+			f.Id = idgen.Generate()
+		} else {
+			log.Errorf("task id is not available: %d", f.Id)
+			return errcode.New(errcode.ErrorCodeBadRequest)
+		}
 	}
 
 	if f.Status != nil {
@@ -34,17 +50,17 @@ func (s *taskService) setTask(f *entity.Task) error {
 	return nil
 }
 
-func (s *taskService) Save(f *entity.Task) error {
-	if err := s.setTask(f); err != nil {
-		return err
+func (s *taskService) Save(f *entity.Task) (*entity.Task, error) {
+	if err := s.setTask(f, true); err != nil {
+		return nil, err
 	}
 
 	if err := s.repo.Save(f.StoreModel()); err != nil {
 		log.Error(err)
-		return errcode.New(errcode.ErrorCodeTaskErr)
+		return nil, errcode.New(errcode.ErrorCodeTaskErr)
 	}
 
-	return nil
+	return f, nil
 }
 
 func (s *taskService) Find() ([]entity.Task, error) {
@@ -65,7 +81,7 @@ func (s *taskService) Find() ([]entity.Task, error) {
 }
 
 func (s *taskService) Set(f *entity.Task) (*entity.Task, error) {
-	if err := s.setTask(f); err != nil {
+	if err := s.setTask(f, false); err != nil {
 		return nil, err
 	}
 
@@ -90,6 +106,7 @@ func (s *taskService) Delete(key int64) error {
 
 func NewTaskService(r repoDomain.ITaskStore) srvDomain.ITaskService {
 	return &taskService{
-		repo: r,
+		repo:     r,
+		workerId: 1,
 	}
 }

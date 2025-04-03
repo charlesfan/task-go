@@ -10,9 +10,9 @@ const (
 )
 
 type Task struct {
-	Id     int64
-	Name   string
-	Status *int
+	Id     int64  `json:"id"`
+	Name   string `json:"name"`
+	Status *int   `json:"status"`
 }
 
 func (t *Task) StoreModel() *model.StoreTask {

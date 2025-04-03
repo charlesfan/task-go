@@ -18,7 +18,6 @@ func Test_Generate(t *testing.T) {
 	for count := 1; count <= 10000; count++ {
 		go func(ch chan int64) {
 			id := worker.Generate()
-			t.Log(id)
 			ch <- id
 		}(ch)
 	}
