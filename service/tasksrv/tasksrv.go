@@ -27,7 +27,18 @@ func (s *taskService) Save(f *entity.Task) error {
 }
 
 func (s *taskService) Find() ([]entity.Task, error) {
-	var f []entity.Task
+	rows, err := s.repo.Find()
+	if err != nil {
+		log.Error(err)
+		return nil, errcode.New(errcode.ErrorCodeTaskErr)
+	}
+
+	f := make([]entity.Task, len(rows))
+	for k, v := range rows {
+		t := entity.Task{}
+		t.FromStoreModel(&v)
+		f[k] = t
+	}
 
 	return f, nil
 }
