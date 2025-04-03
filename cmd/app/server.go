@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/charlesfan/task-go/entity/config"
+	"github.com/charlesfan/task-go/repository/store"
 )
 
 var server = newServer()
@@ -17,6 +18,7 @@ type Server struct {
 }
 
 func (s *Server) Run(c config.Config) error {
+	store.Init(c)
 	s.router = NewRouter(net.JoinHostPort(c.Server.Host, c.Server.Port))
 	s.router.Config()
 	s.router.Run()
