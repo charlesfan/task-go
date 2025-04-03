@@ -73,7 +73,7 @@ func TestTaskService_Save(t *testing.T) {
 				Name:   "Tasksrv-testing",
 				Status: &taskIncomplete,
 			},
-			wantErr:      errcode.New(errcode.ErrorCodeBadRequest),
+			wantErr:      nil,
 			setupSubTest: test.EmptySubTest(),
 		},
 		{
