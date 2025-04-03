@@ -59,7 +59,7 @@ func (s *Store) TaskStore() storeDomain.ITaskStore {
 	return s.taskStore.repo.(storeDomain.ITaskStore)
 }
 
-func Inin(c config.Config) {
+func Init(c config.Config) {
 	s := &Store{}
 	switch c.Store {
 	case RedisStore:

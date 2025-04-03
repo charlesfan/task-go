@@ -4,6 +4,8 @@ import (
 	srvDomain "github.com/charlesfan/task-go/domain/service"
 	repoDomain "github.com/charlesfan/task-go/domain/store"
 	"github.com/charlesfan/task-go/entity"
+	"github.com/charlesfan/task-go/entity/errcode"
+	"github.com/charlesfan/task-go/utils/log"
 )
 
 type taskService struct {
@@ -11,6 +13,16 @@ type taskService struct {
 }
 
 func (s *taskService) Save(f *entity.Task) error {
+	if f.Id <= 0 {
+		log.Errorf("task id is not available: %d", f.Id)
+		return errcode.New(errcode.ErrorCodeBadRequest)
+	}
+
+	if err := s.repo.Save(f.StoreModel()); err != nil {
+		log.Error(err)
+		return errcode.New(errcode.ErrorCodeTaskErr)
+	}
+
 	return nil
 }
 
