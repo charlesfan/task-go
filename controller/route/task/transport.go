@@ -7,8 +7,11 @@ import (
 func ConfigRouterGroup(group *gin.RouterGroup) {
 	c := NewTaskController()
 
-	employeeGroup := group.Group("/tasks")
+	taskGroup := group.Group("/tasks")
 	{
-		employeeGroup.POST("", c.Save)
+		taskGroup.POST("", c.Save)
+		taskGroup.GET("", c.Find)
+		taskGroup.PUT(":id", c.Set)
+		taskGroup.DELETE(":id", c.Del)
 	}
 }

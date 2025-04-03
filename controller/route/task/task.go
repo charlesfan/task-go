@@ -1,6 +1,8 @@
 package task
 
 import (
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/charlesfan/task-go/controller/resp"
@@ -50,10 +52,41 @@ func (a *TaskController) Save(c *gin.Context) {
 }
 
 func (a *TaskController) Set(c *gin.Context) {
+	var r TaskRequest
+
+	if err := c.Bind(&r); err != nil {
+		log.Error("task binding error: ", err)
+		resp.WriteResponse(c, errcode.New(errcode.ErrorCodeBadRequest), nil)
+
+		return
+	}
+
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		log.Error(err)
+		resp.WriteResponse(c, errcode.New(errcode.ErrorCodeBadRequest), nil)
+
+		return
+	}
+
+	r.Id = id
+	re, err := a.taskSrv.Save(r.entityTask())
+	resp.WriteResponse(c, err, re)
 }
 
 func (a *TaskController) Find(c *gin.Context) {
+	datas, err := a.taskSrv.Find()
+	resp.WriteResponse(c, err, datas)
 }
 
 func (a *TaskController) Del(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		log.Error(err)
+		resp.WriteResponse(c, errcode.New(errcode.ErrorCodeBadRequest), nil)
+
+		return
+	}
+
+	resp.WriteResponse(c, a.taskSrv.Delete(id), nil)
 }
