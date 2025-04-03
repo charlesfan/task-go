@@ -81,6 +81,10 @@ func (s *taskService) Set(f *entity.Task) (*entity.Task, error) {
 }
 
 func (s *taskService) Delete(key int64) error {
+	if err := s.repo.Delete(key); err != nil {
+		log.Error(err)
+		return errcode.New(errcode.ErrorCodeTaskErr)
+	}
 	return nil
 }
 
