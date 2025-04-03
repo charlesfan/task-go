@@ -20,6 +20,7 @@ import (
 var (
 	taskIncomplete = entity.TaskIncomplete
 	taskCompleted  = entity.TaskCompleted
+	errStatus      = 5
 )
 
 type TaskServiceTestCaseSuite struct {
@@ -73,6 +74,25 @@ func TestTaskService_Save(t *testing.T) {
 				Status: &taskIncomplete,
 			},
 			wantErr:      errcode.New(errcode.ErrorCodeBadRequest),
+			setupSubTest: test.EmptySubTest(),
+		},
+		{
+			name: "error status",
+			givenFile: &entity.Task{
+				Id:     int64(575880729439768651),
+				Name:   "Tasksrv-testing",
+				Status: &errStatus,
+			},
+			wantErr:      errcode.New(errcode.ErrorCodeBadRequest),
+			setupSubTest: test.EmptySubTest(),
+		},
+		{
+			name: "nil status",
+			givenFile: &entity.Task{
+				Id:   int64(575880729439768661),
+				Name: "Tasksrv-testing",
+			},
+			wantErr:      nil,
 			setupSubTest: test.EmptySubTest(),
 		},
 	}
@@ -142,6 +162,98 @@ func TestTaskService_Find(t *testing.T) {
 			t.Log(datas)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.wantLen, len(datas))
+		})
+	}
+}
+
+func TestTaskService_Set(t *testing.T) {
+	s, teardownTestCase := setupTaskServiceTestCaseSuite(t)
+	defer teardownTestCase(t)
+
+	tt := []struct {
+		name         string
+		givenFile    *entity.Task
+		wantErr      error
+		setupSubTest test.SetupSubTest
+	}{
+		{
+			name: "success",
+			givenFile: &entity.Task{
+				Id:     int64(575880729439768651),
+				Name:   "Tasksrv-testing-put",
+				Status: &taskCompleted,
+			},
+			wantErr: nil,
+			setupSubTest: func(t *testing.T) func(t *testing.T) {
+				f := &model.StoreTask{
+					Id:   int64(575880729439768651),
+					Name: "Task-testing-01",
+					Status: &model.NullInt{
+						Int:   0,
+						Valid: true,
+					},
+				}
+
+				err := s.store.Save(f)
+				assert.Nil(t, err)
+
+				return func(t *testing.T) {
+				}
+			},
+		},
+		{
+			name: "zero id",
+			givenFile: &entity.Task{
+				Id:     int64(0),
+				Name:   "Tasksrv-testing",
+				Status: &taskIncomplete,
+			},
+			wantErr:      errcode.New(errcode.ErrorCodeBadRequest),
+			setupSubTest: test.EmptySubTest(),
+		},
+		{
+			name: "error status",
+			givenFile: &entity.Task{
+				Id:     int64(575880729439768651),
+				Name:   "Tasksrv-testing",
+				Status: &errStatus,
+			},
+			wantErr:      errcode.New(errcode.ErrorCodeBadRequest),
+			setupSubTest: test.EmptySubTest(),
+		},
+		{
+			name: "nil status",
+			givenFile: &entity.Task{
+				Id:   int64(575880729439768661),
+				Name: "Tasksrv-testing",
+			},
+			wantErr: nil,
+			setupSubTest: func(t *testing.T) func(t *testing.T) {
+				f := &model.StoreTask{
+					Id:   int64(575880729439768661),
+					Name: "Task-testing-01",
+					Status: &model.NullInt{
+						Int:   0,
+						Valid: true,
+					},
+				}
+
+				err := s.store.Save(f)
+				assert.Nil(t, err)
+
+				return func(t *testing.T) {
+				}
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			teardownSubTest := tc.setupSubTest(t)
+			defer teardownSubTest(t)
+
+			_, err := s.service.Set(tc.givenFile)
+			assert.Equal(t, tc.wantErr, err)
 		})
 	}
 }

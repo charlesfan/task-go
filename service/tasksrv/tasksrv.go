@@ -12,10 +12,31 @@ type taskService struct {
 	repo repoDomain.ITaskStore
 }
 
-func (s *taskService) Save(f *entity.Task) error {
+func (s *taskService) setTask(f *entity.Task) error {
 	if f.Id <= 0 {
 		log.Errorf("task id is not available: %d", f.Id)
 		return errcode.New(errcode.ErrorCodeBadRequest)
+	}
+
+	if f.Status != nil {
+		status := *f.Status
+		switch status {
+		case entity.TaskIncomplete, entity.TaskCompleted:
+		default:
+			log.Errorf("task status is not available: %d", status)
+			return errcode.New(errcode.ErrorCodeBadRequest)
+		}
+	} else {
+		status := entity.TaskIncomplete
+		f.Status = &status
+	}
+
+	return nil
+}
+
+func (s *taskService) Save(f *entity.Task) error {
+	if err := s.setTask(f); err != nil {
+		return err
 	}
 
 	if err := s.repo.Save(f.StoreModel()); err != nil {
@@ -44,7 +65,19 @@ func (s *taskService) Find() ([]entity.Task, error) {
 }
 
 func (s *taskService) Set(f *entity.Task) (*entity.Task, error) {
-	return f, nil
+	if err := s.setTask(f); err != nil {
+		return nil, err
+	}
+
+	row, err := s.repo.Set(f.StoreModel())
+	if err != nil {
+		log.Error(err)
+		return nil, errcode.New(errcode.ErrorCodeTaskErr)
+	}
+
+	t := &entity.Task{}
+	t.FromStoreModel(row)
+	return t, nil
 }
 
 func (s *taskService) Delete(key int64) error {
