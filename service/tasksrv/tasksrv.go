@@ -50,17 +50,17 @@ func (s *taskService) setTask(f *entity.Task, idCanNil bool) error {
 	return nil
 }
 
-func (s *taskService) Save(f *entity.Task) error {
+func (s *taskService) Save(f *entity.Task) (*entity.Task, error) {
 	if err := s.setTask(f, true); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := s.repo.Save(f.StoreModel()); err != nil {
 		log.Error(err)
-		return errcode.New(errcode.ErrorCodeTaskErr)
+		return nil, errcode.New(errcode.ErrorCodeTaskErr)
 	}
 
-	return nil
+	return f, nil
 }
 
 func (s *taskService) Find() ([]entity.Task, error) {

@@ -102,7 +102,7 @@ func TestTaskService_Save(t *testing.T) {
 			teardownSubTest := tc.setupSubTest(t)
 			defer teardownSubTest(t)
 
-			err := s.service.Save(tc.givenFile)
+			_, err := s.service.Save(tc.givenFile)
 			assert.Equal(t, tc.wantErr, err)
 		})
 	}
