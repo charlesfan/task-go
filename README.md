@@ -16,7 +16,7 @@ $ make test
 ## REST API
 ### Crearte task information
 #### Request
-`POST /samdbox/tasks`
+`POST /sandbox/tasks`
 
     curl -i -H 'Accept: application/json' -X POST -d 'name=task-01&status=0' http://localhost:8080/sandbox/tasks
     
@@ -30,7 +30,7 @@ $ make test
 
 ### Get tasks list
 #### Request
-`GET /samdbox/tasks`
+`GET /sandbox/tasks`
 
     curl -i -H 'Accept: application/json' -X GET http://localhost:8080/sandbox/tasks
 
@@ -44,7 +44,7 @@ $ make test
 
 ### Put task
 #### Request
-`PUT /samdbox/tasks/{id}`
+`PUT /sandbox/tasks/{id}`
 
     curl -i -H 'Accept: application/json' -X PUT -d 'name=task-02&status=1' http://localhost:8080/sandbox/tasks/576604996888432640
 
@@ -58,7 +58,7 @@ $ make test
 
 ### Delete task
 #### Request
-`DELETE /samdbox/tasks/{id}`
+`DELETE /sandbox/tasks/{id}`
 
     curl -i -H 'Accept: application/json' -X DELETE http://localhost:8080/sandbox/tasks/576604996888432640
 
